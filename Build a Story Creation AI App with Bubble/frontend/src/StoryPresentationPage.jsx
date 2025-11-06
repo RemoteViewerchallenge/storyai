@@ -32,19 +32,40 @@ export default function StoryPresentationPage({
   })
 
   const [isLoading, setIsLoading] = useState(false)
+  const [segments, setSegments] = useState([])
+
+  useEffect(() => {
+    // In a real application, you would fetch the initial story segment
+    // from the backend here. For now, we'll just use the initial state.
+  }, []);
 
   const handleUserSubmit = () => {
     if (!storyState.userInput.trim()) return
     
     setIsLoading(true)
-    setTimeout(() => {
+
+    fetch(`/api/stories/1/continue`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ user_input: storyState.userInput })
+    })
+    .then(response => response.json())
+    .then(data => {
+      setSegments(prev => [...prev, data])
       setStoryState(prev => ({
         ...prev,
-        narrativeText: `You decided to: "${prev.userInput}". The story continues...`,
+        currentImage: data.image_url,
+        narrativeText: data.narrative_text,
         userInput: ''
       }))
       setIsLoading(false)
-    }, 1000)
+    })
+    .catch(error => {
+      console.error('Error continuing story:', error)
+      setIsLoading(false)
+    })
   }
 
   const togglePhone = () => {

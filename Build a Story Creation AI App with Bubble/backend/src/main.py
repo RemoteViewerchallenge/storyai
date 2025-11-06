@@ -1,11 +1,10 @@
 import os
 import sys
-# DON'T CHANGE THIS !!!
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from src.models.user import db
+from src.db import db
+from src.models.user import User
 from src.models.character import Character, Story, StorySegment
 from src.models.subscription import UserSubscription, FeatureUsage
 from src.routes.user import user_bp
@@ -28,7 +27,7 @@ app.register_blueprint(story_bp, url_prefix='/api')
 app.register_blueprint(subscription_bp, url_prefix='/api')
 
 # Database configuration
-database_path = os.path.join(os.path.dirname(__file__), 'database', 'app.db')
+database_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'database', 'app.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{database_path}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)

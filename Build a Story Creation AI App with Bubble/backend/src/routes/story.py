@@ -1,10 +1,12 @@
 from flask import Blueprint, jsonify, request, send_file
 from flask_cors import cross_origin
-from src.models.character import Character, Story, StorySegment, db
+from src.db import db
+from src.models.character import Character, Story, StorySegment
 from src.services.ai_services import AIServiceManager
 import os
 import base64
 import tempfile
+import asyncio
 from datetime import datetime
 
 story_bp = Blueprint('story', __name__)
@@ -47,7 +49,7 @@ def create_character():
         
         # Generate avatar image
         avatar_prompt = _create_avatar_prompt(character)
-        image_data = ai_manager.hf_service.generate_image(avatar_prompt, character.image_style)
+        image_data = asyncio.run(ai_manager.comfyui_service.generate_image(avatar_prompt, character.image_style))
         
         if image_data:
             # Save avatar image (in production, use cloud storage)
@@ -109,7 +111,7 @@ def create_story():
             'traits': character.get_traits_dict()
         }
         
-        segment_data = ai_manager.generate_story_segment(initial_prompt, character_data)
+        segment_data = asyncio.run(ai_manager.generate_story_segment(initial_prompt, character_data))
         
         # Save initial segment
         segment = StorySegment(
@@ -181,7 +183,7 @@ def continue_story(story_id):
             'traits': character.get_traits_dict()
         }
         
-        segment_data = ai_manager.generate_story_segment(user_input, character_data, story_history)
+        segment_data = asyncio.run(ai_manager.generate_story_segment(user_input, character_data, story_history))
         
         # Create new segment
         new_segment_number = story.current_segment + 1

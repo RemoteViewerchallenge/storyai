@@ -1,0 +1,11 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+backend/database/app.db
+
+# Node
+node_modules/
+build/
+dist/
+.vite/

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button.jsx'
 import { Checkbox } from '@/components/ui/checkbox.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
@@ -7,6 +7,14 @@ import { Sparkles, BookOpen, Users, Mic } from 'lucide-react'
 
 export default function WelcomePage({ onContinue }) {
   const [termsAccepted, setTermsAccepted] = useState(false)
+  const [status, setStatus] = useState(null)
+
+  useEffect(() => {
+    fetch('/api/status')
+      .then(response => response.json())
+      .then(data => setStatus(data.status))
+      .catch(error => console.error('Error fetching status:', error));
+  }, []);
 
   const handleContinue = () => {
     if (termsAccepted) {
@@ -16,6 +24,9 @@ export default function WelcomePage({ onContinue }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
+      <div style={{ position: 'absolute', top: 0, left: 0, padding: '10px', backgroundColor: 'rgba(0,0,0,0.5)', color: 'white' }}>
+        Backend Status: {status || 'Loading...'}
+      </div>
       <div className="max-w-4xl w-full space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">

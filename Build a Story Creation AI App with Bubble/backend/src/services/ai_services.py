@@ -4,6 +4,7 @@ import base64
 import json
 from typing import Dict, List, Optional
 from dotenv import load_dotenv
+from src.services.comfyui_client import generate_image as comfyui_generate_image
 
 load_dotenv()
 
@@ -194,6 +195,32 @@ class ElevenLabsService:
             print(f"Error fetching voices: {e}")
             return []
 
+class ComfyUIService:
+    """Service for interacting with ComfyUI MCP Server"""
+
+    async def generate_image(self, prompt: str, style: str = "anime") -> Optional[bytes]:
+        """
+        Generate image using ComfyUI
+        """
+        try:
+            # These values would ideally be configurable
+            width = 512
+            height = 512
+            workflow_id = "basic_api_test"
+            model = "sd_xl_base_1.0.safetensors"
+
+            response = await comfyui_generate_image(prompt, width, height, workflow_id, model)
+
+            if response and "image_url" in response:
+                image_url = response["image_url"]
+                image_response = requests.get(image_url)
+                image_response.raise_for_status()
+                return image_response.content
+            else:
+                return None
+        except Exception as e:
+            print(f"Error generating image with ComfyUI: {e}")
+            return None
 
 class AIServiceManager:
     """Manager class for coordinating AI services"""
@@ -201,8 +228,9 @@ class AIServiceManager:
     def __init__(self):
         self.hf_service = HuggingFaceService()
         self.elevenlabs_service = ElevenLabsService()
+        self.comfyui_service = ComfyUIService()
     
-    def generate_story_segment(self, user_input: str, character_data: Dict, story_history: List[str] = None) -> Dict:
+    async def generate_story_segment(self, user_input: str, character_data: Dict, story_history: List[str] = None) -> Dict:
         """
         Generate a complete story segment with text, image, and audio
         """
@@ -213,7 +241,7 @@ class AIServiceManager:
         # Generate image based on story content
         image_prompt = self._extract_scene_description(story_text, character_data)
         image_style = character_data.get('image_style', 'anime')
-        image_data = self.hf_service.generate_image(image_prompt, image_style)
+        image_data = await self.comfyui_service.generate_image(image_prompt, image_style)
         
         # Generate audio narration
         audio_data = self.elevenlabs_service.text_to_speech(story_text, "narrator")
@@ -242,4 +270,3 @@ class AIServiceManager:
             scene_prompt += ", in a domestic setting"
         
         return scene_prompt
-

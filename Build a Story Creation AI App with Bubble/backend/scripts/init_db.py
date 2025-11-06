@@ -8,8 +8,10 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from src.main import app
-from src.models.user import db
+from src.db import db
+from src.models.user import User
 from src.models.character import Character, Story, StorySegment
+from src.models.subscription import *
 
 def init_database():
     """Initialize the database with tables"""

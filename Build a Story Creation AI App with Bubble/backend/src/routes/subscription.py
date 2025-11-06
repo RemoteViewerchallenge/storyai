@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
-from src.models.subscription import UserSubscription, FeatureUsage, SubscriptionTier, db
+from src.db import db
+from src.models.subscription import UserSubscription, FeatureUsage, SubscriptionTier
 from datetime import datetime
 
 subscription_bp = Blueprint('subscription', __name__)

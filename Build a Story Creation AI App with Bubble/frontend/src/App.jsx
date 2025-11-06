@@ -1,9 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import WelcomePage from './components/WelcomePage.jsx'
 import CharacterCreationPage from './components/CharacterCreationPage.jsx'
 import './App.css'
 
 function App() {
+  useEffect(() => {
+    fetch('/api/status')
+      .then(response => response.json())
+      .then(data => setStatus(data.status))
+      .catch(error => console.error('Error fetching status:', error));
+  }, []);
+
+  const [status, setStatus] = useState(null);
   const [currentPage, setCurrentPage] = useState('welcome')
   const [userData, setUserData] = useState({
     character: null,
@@ -12,7 +20,7 @@ function App() {
   })
 
   const handleWelcomeContinue = () => {
-    setCurrentPage('character-creation')
+    setCurrentPage('story-presentation')
   }
 
   const handleCharacterCreated = (character) => {
@@ -121,6 +129,9 @@ function App() {
 
   return (
     <div className="App">
+      <div style={{ position: 'absolute', top: 0, left: 0, padding: '10px', backgroundColor: 'rgba(0,0,0,0.5)', color: 'white' }}>
+        Backend Status: {status}
+      </div>
       {renderCurrentPage()}
     </div>
   )
